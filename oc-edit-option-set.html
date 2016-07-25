@@ -8,9 +8,7 @@
 
 <link rel="import" href="../oc-option-set-input/oc-option-set-input.html">
 <link rel="import" href="../oc-option-input/oc-option-input.html">
-
 <link rel="import" href="../oc-product-option-api/oc-product-option-api.html">
-
 <!--
 `oc-edit-option-set`
 Element to edit an existing Option Set
@@ -71,30 +69,29 @@ Element to edit an existing Option Set
       },
 
       observers: [
-        '_loadOptionSet(optionSetId)'
+        '_loadOptionSet(organisationId,optionSetId)'
       ],
 
       ready: function() {
         this._showNewOptionInput = false;
-        this.loading = false;
-        this._options = [];
       },
 
       _loadOptionSet: function() {
-        this.loading = true;
-        this.$.optionsApi.getOptionSet(this.optionSetId)
-                .then(function(response) {
-                  this.$.optionSetInput.setOptionSetDetails(response.detail);
-                }.bind(this))
-                .catch(this.fire.bind(this, 'options_error', 'Could not load Option Set'))
-                .finally(function() {
-                  this.loading = false;
-                }.bind(this))
+        if (this.organisationId) {
+          this.loading = true;
+          this.$.optionsApi.getOptionSet(this.optionSetId)
+                  .then(function (request) {
+                    this.$.optionSetInput.setOptionSetDetails(request.response);
+                    this._options = request.response.options;
+                  }.bind(this))
+                  .catch(this.fire.bind(this, 'options_error', 'Could not load Option Set'))
+                  .finally(this.set.bind(this, 'loading', false));
+        }
       },
 
       _onSaveOptionSet: function(event) {
         this.loading = true;
-        this.$.optionsApi.updateOptionSet(event.detail)
+        this.$.optionsApi.updateOptionSet(this.optionSetId, event.detail)
                 .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
                 .finally(this.set.bind(this, 'loading', false));
       },
