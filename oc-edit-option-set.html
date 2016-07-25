@@ -9,6 +9,7 @@
 <link rel="import" href="../oc-option-set-input/oc-option-set-input.html">
 <link rel="import" href="../oc-option-input/oc-option-input.html">
 <link rel="import" href="../oc-product-option-api/oc-product-option-api.html">
+<link rel="import" href="../oc-options-list/oc-options-list.html">
 <!--
 `oc-edit-option-set`
 Element to edit an existing Option Set
@@ -44,9 +45,7 @@ Element to edit an existing Option Set
       </iron-collapse>
       <iron-collapse opened$="[[ !_showNewOptionInput ]]">
         <paper-button class="new-option-button" on-tap="_onNewOptionTapped">New Option</paper-button>
-        <template is="dom-repeat" items="[[ _options ]]">
-          <div><span>{{item.name}}</span></div>
-        </template>
+        <oc-options-list options="[[ _options ]]"></oc-options-list>
       </iron-collapse>
     </paper-material>
 
