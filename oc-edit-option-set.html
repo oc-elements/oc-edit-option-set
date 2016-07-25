@@ -1,0 +1,135 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+
+<link rel="import" href="../oc-option-set-input/oc-option-set-input.html">
+<link rel="import" href="../oc-option-input/oc-option-input.html">
+
+<link rel="import" href="../oc-product-option-api/oc-product-option-api.html">
+
+<!--
+`oc-edit-option-set`
+Element to edit an existing Option Set
+
+@demo demo/index.html 
+-->
+
+<dom-module id="oc-edit-option-set">
+
+  <style>
+    :host {
+      display: block;
+    }
+    paper-material {
+      background-color: #fff;
+      padding: 10px;
+    }
+    .options-material {
+      margin: 10px 0px 0px 0px;
+    }
+    .new-option-button {
+      margin: 10px;
+    }
+  </style>
+
+  <template>
+    <paper-material>
+      <oc-option-set-input id="optionSetInput" on-action="_onSaveOptionSet" action-name="Save Option Set"></oc-option-set-input>
+    </paper-material>
+    <paper-material class="options-material">
+      <iron-collapse opened$="[[ _showNewOptionInput ]]">
+        <oc-option-input id="optionInput" on-create="_onCreateOption"></oc-option-input>
+      </iron-collapse>
+      <iron-collapse opened$="[[ !_showNewOptionInput ]]">
+        <paper-button class="new-option-button" on-tap="_onNewOptionTapped">New Option</paper-button>
+        <template is="dom-repeat" items="[[ _options ]]">
+          <div><span>{{item.name}}</span></div>
+        </template>
+      </iron-collapse>
+    </paper-material>
+
+    <oc-product-option-api id="optionsApi"></oc-product-option-api>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'oc-edit-option-set',
+
+      properties: {
+        organisationId: Number,
+        optionSetId: Number,
+        loading: {
+          type: Boolean,
+          value: false,
+          notify: true
+        }
+      },
+
+      observers: [
+        '_loadOptionSet(optionSetId)'
+      ],
+
+      ready: function() {
+        this._showNewOptionInput = false;
+        this.loading = false;
+        this._options = [];
+      },
+
+      _loadOptionSet: function() {
+        this.loading = true;
+        this.$.optionsApi.getOptionSet(this.optionSetId)
+                .then(function(response) {
+                  this.$.optionSetInput.setOptionSetDetails(response.detail);
+                }.bind(this))
+                .catch(this.fire.bind(this, 'options_error', 'Could not load Option Set'))
+                .finally(function() {
+                  this.loading = false;
+                }.bind(this))
+      },
+
+      _onSaveOptionSet: function(event) {
+        this.loading = true;
+        this.$.optionsApi.updateOptionSet(event.detail)
+                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
+                .finally(this.set.bind(this, 'loading', false));
+      },
+
+      _onNewOptionTapped: function(event) {
+        this.$.optionInput.clear();
+        this._showNewOptionInput = true;
+      },
+
+      _onCreateOption: function(event) {
+        this.loading = true;
+        this.$.optionsApi.createOption(this.organisationId,
+                {
+                  name: event.detail.name,
+                  price: event.detail.price,
+                  description: event.detail.description,
+                  setId: this.optionSetId,
+                  itemsPluFlatMappingEnabled: false})
+                .then(function() {this._refreshOptions()}.bind(this))
+                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
+      },
+
+      _refreshOptions: function() {
+        this.loading = true;
+        this.$.optionsApi.getOptionSet(this.optionSetId)
+                .then(function(response) {
+                  this._options = response.response.options;
+                }.bind(this))
+                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
+                .finally(function () {
+                  this._showNewOptionInput = false;
+                  this.loading = false;
+                }.bind(this));
+      }
+
+    });
+  </script>
+</dom-module>
