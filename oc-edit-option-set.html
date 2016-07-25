@@ -45,7 +45,7 @@ Element to edit an existing Option Set
       </iron-collapse>
       <iron-collapse opened$="[[ !_showNewOptionInput ]]">
         <paper-button class="new-option-button" on-tap="_onNewOptionTapped">New Option</paper-button>
-        <oc-options-list options="[[ _options ]]"></oc-options-list>
+        <oc-options-list options="[[ _options ]]"  on-edit="_onEditOption" on-delete="_onDeleteOption"></oc-options-list>
       </iron-collapse>
     </paper-material>
 
@@ -129,6 +129,19 @@ Element to edit an existing Option Set
       _onCancelNewOption: function(event) {
         this.$.optionInput.clear();
         this._showNewOptionInput = false;
+      },
+
+      _onEditOption: function(event) {
+        this.fire('editOption', event);
+      },
+
+      _onDeleteOption: function(event) {
+        this.loading = true;
+        this.$.optionsApi.deleteOption(event.detail.id)
+                .then(function () {
+                  this._refreshOptions();
+                }.bind(this))
+                .catch(this.fire.bind(this, 'options_error', 'Could not delete option'))
       }
     });
   </script>
