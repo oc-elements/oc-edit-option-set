@@ -41,7 +41,7 @@ Element to edit an existing Option Set
     </paper-material>
     <paper-material class="options-material">
       <iron-collapse opened$="[[ _showNewOptionInput ]]">
-        <oc-option-input id="optionInput" on-create="_onCreateOption"></oc-option-input>
+        <oc-option-input id="optionInput" on-create="_onCreateOption" on-cancel="_onCancelNewOption"></oc-option-input>
       </iron-collapse>
       <iron-collapse opened$="[[ !_showNewOptionInput ]]">
         <paper-button class="new-option-button" on-tap="_onNewOptionTapped">New Option</paper-button>
@@ -124,8 +124,12 @@ Element to edit an existing Option Set
                   this._showNewOptionInput = false;
                   this.loading = false;
                 }.bind(this));
-      }
+      },
 
+      _onCancelNewOption: function(event) {
+        this.$.optionInput.clear();
+        this._showNewOptionInput = false;
+      }
     });
   </script>
 </dom-module>
