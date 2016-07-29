@@ -58,13 +58,6 @@ Element to edit an existing Option Set
       is: 'oc-edit-option-set',
 
       properties: {
-        organisationId: Number,
-        optionSetId: Number,
-        loading: {
-          type: Boolean,
-          value: false,
-          notify: true
-        }
       },
 
       observers: [
@@ -75,55 +68,29 @@ Element to edit an existing Option Set
         this._showNewOptionInput = false;
       },
 
-      _loadOptionSet: function() {
-        if (this.organisationId) {
-          this.loading = true;
-          this.$.optionsApi.getOptionSet(this.optionSetId)
-                  .then(function (request) {
-                    this.$.optionSetInput.setOptionSetDetails(request.response);
-                    this._options = request.response.options;
-                  }.bind(this))
-                  .catch(this.fire.bind(this, 'options_error', 'Could not load Option Set'))
-                  .finally(this.set.bind(this, 'loading', false));
-        }
+      setOptionSet: function(optionSet) {
+        this.$.optionSetInput.setOptionSetDetails(optionSet);
+      },
+
+      setOptions: function(options) {
+        this._options = options;
+      },
+
+      showNewOptionInput: function(show) {
+        this._showNewOptionInput = show;
       },
 
       _onSaveOptionSet: function(event) {
-        this.loading = true;
-        this.$.optionsApi.updateOptionSet(this.optionSetId, event.detail)
-                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
-                .finally(this.set.bind(this, 'loading', false));
+        this.fire('save-option-set', event.detail);
       },
 
-      _onNewOptionTapped: function(event) {
+      _onNewOptionTapped: function() {
         this.$.optionInput.clear();
         this._showNewOptionInput = true;
       },
 
       _onCreateOption: function(event) {
-        this.loading = true;
-        this.$.optionsApi.createOption(this.organisationId,
-                {
-                  name: event.detail.name,
-                  price: event.detail.price,
-                  description: event.detail.description,
-                  setId: this.optionSetId,
-                  itemsPluFlatMappingEnabled: false})
-                .then(function() {this._refreshOptions()}.bind(this))
-                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
-      },
-
-      _refreshOptions: function() {
-        this.loading = true;
-        this.$.optionsApi.getOptionSet(this.optionSetId)
-                .then(function(response) {
-                  this._options = response.response.options;
-                }.bind(this))
-                .catch(this.fire.bind(this, 'options_error', 'Could not update option set'))
-                .finally(function () {
-                  this._showNewOptionInput = false;
-                  this.loading = false;
-                }.bind(this));
+        this.fire('create-option', event.detail);
       },
 
       _onCancelNewOption: function(event) {
@@ -132,16 +99,11 @@ Element to edit an existing Option Set
       },
 
       _onEditOption: function(event) {
-        this.fire('edit-option', event);
+        this.fire('edit-option', event.detail);
       },
 
       _onDeleteOption: function(event) {
-        this.loading = true;
-        this.$.optionsApi.deleteOption(event.detail.id)
-                .then(function () {
-                  this._refreshOptions();
-                }.bind(this))
-                .catch(this.fire.bind(this, 'options_error', 'Could not delete option'))
+        this.fire('delete-option', event.detail);
       }
     });
   </script>
