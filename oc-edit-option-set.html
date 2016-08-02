@@ -8,13 +8,12 @@
 
 <link rel="import" href="../oc-option-set-input/oc-option-set-input.html">
 <link rel="import" href="../oc-option-input/oc-option-input.html">
-<link rel="import" href="../oc-product-option-api/oc-product-option-api.html">
 <link rel="import" href="../oc-options-list/oc-options-list.html">
 <!--
 `oc-edit-option-set`
 Element to edit an existing Option Set
 
-@demo demo/index.html 
+@demo demo/index.html
 -->
 
 <dom-module id="oc-edit-option-set">
@@ -41,7 +40,7 @@ Element to edit an existing Option Set
     </paper-material>
     <paper-material class="options-material">
       <iron-collapse opened$="[[ _showNewOptionInput ]]">
-        <oc-option-input id="optionInput" on-create="_onCreateOption" on-cancel="_onCancelNewOption"></oc-option-input>
+        <oc-option-input id="optionInput" on-create="_onCreateOption" plu-flatmapping="[[pluFlatmapping]]" on-cancel="_onCancelNewOption"></oc-option-input>
       </iron-collapse>
       <iron-collapse opened$="[[ !_showNewOptionInput ]]">
         <paper-button class="new-option-button" on-tap="_onNewOptionTapped">New Option</paper-button>
@@ -49,7 +48,6 @@ Element to edit an existing Option Set
       </iron-collapse>
     </paper-material>
 
-    <oc-product-option-api id="optionsApi"></oc-product-option-api>
   </template>
 
   <script>
@@ -58,6 +56,7 @@ Element to edit an existing Option Set
       is: 'oc-edit-option-set',
 
       properties: {
+        pluFlatmapping : Boolean
       },
 
       observers: [
@@ -66,6 +65,10 @@ Element to edit an existing Option Set
 
       ready: function() {
         this._showNewOptionInput = false;
+      },
+
+      _loadOptionSet : function(){
+        this.fire('load-option-set', event.detail);
       },
 
       setOptionSet: function(optionSet) {
